@@ -1,5 +1,7 @@
-import psutil as ps
 import math
+import datetime as dt
+import psutil as ps
+
 
 
 # TEMPLATES = {
@@ -19,6 +21,7 @@ def get_cpu_percent():
 
         return res
 
+
 def get_memory():
     res = {}
     memory_info = ps.virtual_memory()
@@ -29,6 +32,7 @@ def get_memory():
     res['used_bar'] = math.ceil(res['used'] * 100 / res['total'])
 
     return res
+
 
 def get_swap_memory():
     res = {}
@@ -41,6 +45,20 @@ def get_swap_memory():
 
     return res
 
+
+def get_uptime():
+    current_uptime = (
+        dt.datetime.today().replace(microsecond=0) - dt.datetime.fromtimestamp(ps.boot_time())
+    )
+
+    return current_uptime
+
+
+def get_load_average():
+    load_average = ps.getloadavg() 
+    return '{:.2f} {:.2f} {:.2f}'.format(load_average[0], load_average[1], load_average[2])   
+
+
 def show(**kwargs):
     for kwarg in kwargs:
         print(kwarg)
@@ -49,6 +67,8 @@ def main():
     #print(get_cpu_percent())
     print(get_memory())
     print(get_swap_memory())
+    print(get_uptime())
+    print(get_load_average())
     # pass
 
 
