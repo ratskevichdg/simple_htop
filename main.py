@@ -175,6 +175,7 @@ def main():
 
 if __name__ == '__main__':
     listener = keyboard.Listener(on_press=on_press)
+    listener.start()
     break_program = True
     while True:
         if break_program:
