@@ -4,39 +4,35 @@ import datetime as dt
 import psutil as ps
 from pynput import keyboard
 
-
-
 TEMPLATES = {
     'cpu_status_bar': '{core}  [{percent_bar:.<50} {percent: >4}%]',
     'memory_status_bar': 'Mem[{used_bar:.<50}{used:.2}G/{total:.2}G]',
     'swap_status_bar': 'Swp[{used_bar:.<50}{used:.2}G/{total:.2}G]',
     'uptime_info': 'Uptime: {uptime}',
     'load_avg_info': 'Load average: {load_avg}',
-    'process_info': ('{pid: <6} {name: <50} {create_time}' 
-                    '{status: ^10} {nice: ^4} {memory_usage: <12} {username: <15}')
-
+    'process_info': ('{pid: <6} {name: <50} {create_time}'
+                     '{status: ^10} {nice: ^4} {memory_usage: <12} {username: <15}')
 }
 
- 
+
 def get_cpu_percent():
     # get the cpu usage in percents for each core
-        res = {'core': [], 'percent': [], 'percent_bar': []}
-        cpus = ps.cpu_percent(interval=0.5, percpu=True)
-        for i in range(len(cpus)):
-            res['core'].append(i)
-            res['percent'].append(cpus[i])
-            res['percent_bar'].append('|' * math.ceil(cpus[i]/2))
+    res = {'core': [], 'percent': [], 'percent_bar': []}
+    cpus = ps.cpu_percent(interval=0.5, percpu=True)
+    for i in range(len(cpus)):
+        res['core'].append(i)
+        res['percent'].append(cpus[i])
+        res['percent_bar'].append('|' * math.ceil(cpus[i] / 2))
+    return res
 
-        return res
 
 def get_memory():
     # get the RAM usage 
     res = {}
     memory_info = ps.virtual_memory()
-    res['total'] = memory_info.total / (1024**3)
-    res['used'] = memory_info.used / (1024**3)
+    res['total'] = memory_info.total / (1024 ** 3)
+    res['used'] = memory_info.used / (1024 ** 3)
     res['used_bar'] = '|' * math.ceil(res['used'] * 100 / res['total'] / 2)
-
     return res
 
 
@@ -44,30 +40,27 @@ def get_swap_memory():
     # get the swap memory usage
     res = {}
     swap_memory_info = ps.swap_memory()
-    res['total'] = swap_memory_info.total / (1024**3)
-    res['used'] = swap_memory_info.used / (1024**3)
+    res['total'] = swap_memory_info.total / (1024 ** 3)
+    res['used'] = swap_memory_info.used / (1024 ** 3)
     try:
         res['used_bar'] = '|' * math.ceil(res['used'] * 100 / res['total'] / 2)
     except ZeroDivisionError:
         res['used_bar'] = ''
-
     return res
 
 
 def get_uptime():
     # get the current uptime
     current_uptime = (
-        dt.datetime.today().replace(microsecond=0) - dt.datetime.fromtimestamp(ps.boot_time())
+            dt.datetime.today().replace(microsecond=0) - dt.datetime.fromtimestamp(ps.boot_time())
     )
-
     return current_uptime
 
 
 def get_load_average():
     # get the average system load over the last 1, 5 and 15 minutes
-    load_average = ps.getloadavg() 
-
-    return '{:.2f} {:.2f} {:.2f}'.format(load_average[0], load_average[1], load_average[2])   
+    load_average = ps.getloadavg()
+    return '{:.2f} {:.2f} {:.2f}'.format(load_average[0], load_average[1], load_average[2])
 
 
 def get_processes_info():
@@ -101,15 +94,13 @@ def get_processes_info():
             except ps.AccessDenied:
                 username = "N/A"
         processes.append({
-            'pid': pid, 'name': name, 'create_time': create_time,'status': status,
+            'pid': pid, 'name': name, 'create_time': create_time, 'status': status,
             'nice': nice, 'memory_usage': memory_usage, 'username': username
         })
-
     return processes
 
 
 def show(**kwargs):
-    
     # clear a terminal window
     print(chr(27) + "[2J")
     print('Press <esc> to exit')
@@ -120,29 +111,29 @@ def show(**kwargs):
     for c, b, p in zip(cores, percent_bars, percents):
         if c % 2 == 0:
             print(TEMPLATES['cpu_status_bar'].format(
-                core=c, 
-                percent_bar=b, 
+                core=c,
+                percent_bar=b,
                 percent=p), end='\t\t')
         else:
             print(TEMPLATES['cpu_status_bar'].format(
-                core=c, 
-                percent_bar=b, 
+                core=c,
+                percent_bar=b,
                 percent=p))
-    
+
     memory_info = kwargs['memory_percent']
     print(TEMPLATES['memory_status_bar'].format(
-            used_bar=memory_info['used_bar'],
-            used=memory_info['used'],
-            total=memory_info['total']), end='\t')
+        used_bar=memory_info['used_bar'],
+        used=memory_info['used'],
+        total=memory_info['total']), end='\t')
 
     load_average = kwargs['load_avg']
     print(TEMPLATES['load_avg_info'].format(load_avg=load_average))
 
     swap_info = kwargs['swap_percent']
     print(TEMPLATES['swap_status_bar'].format(
-            used_bar=swap_info['used_bar'],
-            used=swap_info['used'],
-            total=swap_info['total']), end='\t')
+        used_bar=swap_info['used_bar'],
+        used=swap_info['used'],
+        total=swap_info['total']), end='\t')
 
     uptime = kwargs['uptime']
     print(TEMPLATES['uptime_info'].format(uptime=uptime))
@@ -150,12 +141,12 @@ def show(**kwargs):
     processes = kwargs['processes']
     print(
         '{: <6} {: <50} {: <26} {: <10} {: <4} {: <12} {: <15}'.format(
-            'pid', 'name', 'create time', 
-            'status', 'nice', 'memory usage', 
+            'pid', 'name', 'create time',
+            'status', 'nice', 'memory usage',
             'username'
-            )
         )
-    print('-'*128)
+    )
+    print('-' * 128)
     for proc in processes[:-10:-1]:
         print(TEMPLATES['process_info'].format(**proc))
 
@@ -167,7 +158,6 @@ def on_press(key):
 
 
 def main():
-
     cpu_percent_info = get_cpu_percent()
     memory_percent_info = get_memory()
     swap_percent_info = get_swap_memory()
@@ -175,19 +165,16 @@ def main():
     load_avg = get_load_average()
     processes = get_processes_info()
 
-    show(cpu_percent=cpu_percent_info, 
-        memory_percent=memory_percent_info,
-        swap_percent=swap_percent_info,
-        uptime=uptime,
-        load_avg=load_avg,
-        processes=processes)
- 
-             
+    show(cpu_percent=cpu_percent_info,
+         memory_percent=memory_percent_info,
+         swap_percent=swap_percent_info,
+         uptime=uptime,
+         load_avg=load_avg,
+         processes=processes)
 
 
 if __name__ == '__main__':
-    listener =  keyboard.Listener(on_press=on_press)
-    listener.start()
+    listener = keyboard.Listener(on_press=on_press)
     break_program = True
     while True:
         if break_program:
