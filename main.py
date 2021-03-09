@@ -52,7 +52,8 @@ def get_swap_memory():
 def get_uptime():
     # get the current uptime
     current_uptime = (
-            dt.datetime.today().replace(microsecond=0) - dt.datetime.fromtimestamp(ps.boot_time())
+            dt.datetime.today().replace(microsecond=0) - 
+            dt.datetime.fromtimestamp(ps.boot_time())
     )
     return current_uptime
 
@@ -60,7 +61,10 @@ def get_uptime():
 def get_load_average():
     # get the average system load over the last 1, 5 and 15 minutes
     load_average = ps.getloadavg()
-    return '{:.2f} {:.2f} {:.2f}'.format(load_average[0], load_average[1], load_average[2])
+    return '{:.2f} {:.2f} {:.2f}'.format(
+            load_average[0], 
+            load_average[1], 
+            load_average[2])
 
 
 def get_processes_info():
@@ -81,7 +85,7 @@ def get_processes_info():
             status = process.status() 
             try:
                 # get the process priority (a lower value means a more
-                #  prioritized process)
+                # prioritized process)
                 nice = int(process.nice())
             except ps.AccessDenied:
                 nice = 0
