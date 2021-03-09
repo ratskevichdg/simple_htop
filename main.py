@@ -78,9 +78,10 @@ def get_processes_info():
                 # system processes, using boot time instead
                 create_time = dt.datetime.fromtimestamp(ps.boot_time())
             # get the status of the process (running, idle, etc.)
-            status = process.status()
+            status = process.status() 
             try:
-                # get the process priority (a lower value means a more prioritized process)
+                # get the process priority (a lower value means a more
+                #  prioritized process)
                 nice = int(process.nice())
             except ps.AccessDenied:
                 nice = 0
@@ -177,9 +178,6 @@ if __name__ == '__main__':
     listener = keyboard.Listener(on_press=on_press)
     listener.start()
     break_program = True
-    while True:
-        if break_program:
-            main()
-            time.sleep(0.5)
-        else:
-            break
+    while break_program:
+        main()
+        time.sleep(0.5)
